@@ -433,3 +433,148 @@ section {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.tab {
+  padding: 10px 24px;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Tab Panels ───────────────────────────────────────────── */
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* ── Sortable Column Headers ──────────────────────────────── */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.sortable:hover {
+  color: var(--accent);
+}
+
+.sort-arrow {
+  font-size: 0.7rem;
+  margin-left: 4px;
+  opacity: 0.4;
+}
+
+.sort-arrow.asc::after {
+  content: "▲";
+  opacity: 1;
+}
+
+.sort-arrow.desc::after {
+  content: "▼";
+  opacity: 1;
+}
+
+/* ── Artist Accordion ─────────────────────────────────────── */
+.artist-group {
+  margin-bottom: 4px;
+}
+
+.artist-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.artist-group-header:hover {
+  border-color: var(--accent);
+  background: rgba(233, 69, 96, 0.06);
+}
+
+.artist-chevron {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  width: 12px;
+  text-align: center;
+}
+
+.artist-group.open .artist-chevron {
+  transform: rotate(90deg);
+}
+
+.artist-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.artist-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.artist-group-songs {
+  display: none;
+  padding: 4px 0 4px 28px;
+}
+
+.artist-group.open .artist-group-songs {
+  display: block;
+}
+
+.artist-song-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.artist-song-item:last-child {
+  border-bottom: none;
+}
+
+.artist-song-item:hover {
+  background: rgba(233, 69, 96, 0.06);
+}
+
+.artist-song-title {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.artist-song-item .btn-play,
+.artist-song-item .btn-menu {
+  flex-shrink: 0;
+}

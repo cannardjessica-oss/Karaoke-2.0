@@ -44,19 +44,33 @@
       />
     </div>
 
-    <table id="songs-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Title</th>
-          <th>Artist</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="songs-tbody"></tbody>
-    </table>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="all-songs">All Songs</button>
+      <button class="tab" data-tab="by-artist">By Artist</button>
+    </div>
 
-    <p id="no-songs-msg" class="muted">No songs yet — search YouTube above to add some!</p>
+    <!-- All Songs Panel -->
+    <div id="all-songs-panel" class="tab-panel active">
+      <table id="songs-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="sortable" data-sort="title">Title <span class="sort-arrow"></span></th>
+            <th class="sortable" data-sort="artist">Artist <span class="sort-arrow"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="songs-tbody"></tbody>
+      </table>
+      <p id="no-songs-msg" class="muted">No songs yet — search YouTube above to add some!</p>
+    </div>
+
+    <!-- By Artist Panel -->
+    <div id="artist-panel" class="tab-panel hidden">
+      <div id="artist-list"></div>
+      <p id="no-artists-msg" class="muted hidden">No songs yet — search YouTube above to add some!</p>
+    </div>
   </section>
 
   <!-- ── Add Song Modal (manual entry) ───────────────────── -->
