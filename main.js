@@ -28,7 +28,11 @@ function openPlayerWindow(youtubeId) {
     fullscreen: true,
     autoHideMenuBar: true,
     backgroundColor: "#000",
-    webPreferences: { contextIsolation: true, nodeIntegration: false },
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      partition: "persist:youtube",
+    },
   });
   playerWindows.push(playerWin);
   playerWin.on("closed", () => {

@@ -1,7 +1,6 @@
 // ── DOM References ────────────────────────────────────────────
 const ytSearchInput = document.getElementById("yt-search-input");
 const ytSearchBtn = document.getElementById("yt-search-btn");
-const importBtn = document.getElementById("import-btn");
 const ytResultsSection = document.getElementById("yt-results-section");
 const ytResultsContainer = document.getElementById("yt-results");
 const ytResultsClose = document.getElementById("yt-results-close");
@@ -226,40 +225,6 @@ async function doYouTubeSearch() {
 ytSearchBtn.addEventListener("click", doYouTubeSearch);
 ytSearchInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") doYouTubeSearch();
-});
-
-// ── Event: Import CSV ─────────────────────────────────────────
-importBtn.addEventListener("click", async () => {
-  importBtn.disabled = true;
-  importBtn.innerHTML = '<span class="spinner"></span>Importing…';
-
-  try {
-    const result = await window.api.importCSV();
-    if (result.error === "cancelled") return;
-    if (!result.success) {
-      showToast(result.error, false);
-      return;
-    }
-
-    let msg = `Imported ${result.added} songs.`;
-    if (result.skipped > 0) {
-      const names = result.skippedSongs
-        .map((s) => `${s.artist} - ${s.title}`)
-        .join("\n");
-      msg += ` ${result.skipped} skipped (already exist).`;
-      alert(
-        `Imported ${result.added} songs.\n\n${result.skipped} skipped (already exist):\n${names}`,
-      );
-    } else {
-      showToast(msg);
-    }
-    await loadSongs();
-  } catch (err) {
-    showToast(`Import failed: ${err.message}`, false);
-  } finally {
-    importBtn.disabled = false;
-    importBtn.textContent = "📥 Import";
-  }
 });
 
 // ── Event: Close YouTube results ──────────────────────────────
