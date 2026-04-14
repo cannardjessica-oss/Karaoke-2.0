@@ -25,6 +25,11 @@ function start(port = 3000, options = {}) {
   const app = express();
   app.use(express.json());
 
+  // Serve static assets
+  app.get("/banner.png", (_req, res) => {
+    res.sendFile(path.join(__dirname, "banner.png"));
+  });
+
   // Serve the mobile page
   app.get("/", (_req, res) => {
     res.sendFile(path.join(__dirname, "mobile.html"));

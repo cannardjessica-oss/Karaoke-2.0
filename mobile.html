@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Karaoke</title>
+  <title>City Karaoke</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #1a1a2e; --bg-card: #16213e; --bg-input: #0f3460;
-      --accent: #e94560; --accent-hover: #ff6b81; --text: #eaeaea;
-      --text-muted: #888; --border: #2a2a4a; --success: #2ecc71; --radius: 10px;
+      --bg: #0a0a1a; --bg-card: #12122a; --bg-input: #1a1a3e;
+      --accent: #e94590; --accent-hover: #ff6baa; --text: #eaeaff;
+      --text-muted: #8888bb; --border: #2a2a5a; --success: #2effaa; --radius: 10px;
     }
     body {
       font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
@@ -20,13 +20,27 @@
     }
 
     /* Header */
+    .banner {
+      position: relative; width: 100%;
+      background: var(--bg); line-height: 0;
+    }
+    .banner img { width: 100%; display: block; }
+    .banner::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 50%; background: linear-gradient(transparent, var(--bg));
+      pointer-events: none;
+    }
+    .banner h1 {
+      position: absolute; bottom: 8px; left: 16px;
+      font-size: 1.4rem; color: #fff; z-index: 1; line-height: 1.2;
+      text-shadow: 0 0 10px var(--accent), 0 0 30px var(--accent), 0 0 60px rgba(233,69,144,0.4);
+    }
     header {
-      background: var(--bg-card); padding: 16px;
+      background: var(--bg-card); padding: 10px 16px;
       border-bottom: 1px solid var(--border);
       display: flex; flex-direction: column; gap: 10px;
       position: sticky; top: 0; z-index: 10;
     }
-    header h1 { font-size: 1.2rem; text-align: center; }
     .search-row { display: flex; gap: 8px; }
     .search-row input {
       flex: 1; background: var(--bg-input); border: 1px solid var(--border);
@@ -218,8 +232,12 @@
 </head>
 <body>
 
+  <div class="banner">
+    <img src="/banner.png" alt="City Karaoke" />
+    <h1>🎤 City Karaoke</h1>
+  </div>
+
   <header>
-    <h1>🎤 Karaoke</h1>
     <div class="search-row">
       <input type="text" id="yt-search" placeholder="Search YouTube…" autocomplete="off" />
       <button id="yt-search-btn">Search</button>

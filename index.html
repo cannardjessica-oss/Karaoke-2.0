@@ -9,20 +9,21 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- ── Banner ──────────────────────────────────────────── -->
+  <div class="banner">
+    <img src="desktop-banner.png" alt="City Karaoke" />
+  </div>
+
   <!-- ── Header ──────────────────────────────────────────── -->
   <header>
-    <h1>🎤 City Karaoke</h1>
     <div id="yt-search-bar">
       <input
         type="text"
         id="yt-search-input"
-        placeholder="Search YouTube for karaoke songs…"
+        placeholder="Search YouTube…"
         autocomplete="off"
       />
       <button id="yt-search-btn">Search</button>
-    </div>
-    <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
-      <img id="mobile-qr-img" alt="QR Code" />
     </div>
   </header>
 
@@ -43,6 +44,9 @@
         id="local-search-input"
         placeholder="Search songs…"
       />
+      <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
+        <img id="mobile-qr-img" alt="QR Code" />
+      </div>
     </div>
 
     <!-- Tabs -->
