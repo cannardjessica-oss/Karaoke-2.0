@@ -77,11 +77,12 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .song-play {
-      background: var(--success); color: #fff; border: none;
-      padding: 8px 14px; border-radius: var(--radius);
-      font-size: 0.85rem; cursor: pointer; white-space: nowrap;
+      background: transparent; border: none;
+      padding: 4px 8px; cursor: pointer; white-space: nowrap;
+      line-height: 0; border-radius: var(--radius);
     }
-    .song-play:hover { background: #27ae60; }
+    .song-play svg { display: block; }
+    .song-play:hover { opacity: 0.8; }
     .song-menu {
       background: transparent; border: none; color: var(--text-muted);
       font-size: 1.3rem; padding: 4px 8px; cursor: pointer;
@@ -290,7 +291,7 @@ function renderSongs(songs) {
         <div class="song-title">${decodeHTML(s.title)}</div>
         <div class="song-artist">${decodeHTML(s.artist)}</div>
       </div>
-      <button class="song-play" data-id="${s.youtube_id}">▶ Play</button>
+      <button class="song-play" data-id="${s.youtube_id}"><svg width="24" height="18" viewBox="0 0 68 48"><rect rx="10" ry="10" width="68" height="48" fill="#f00"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg></button>
       <button class="song-menu">⋮</button>
     </div>
   `).join("");
