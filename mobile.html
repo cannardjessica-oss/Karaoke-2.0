@@ -90,28 +90,57 @@
     }
     .song-menu:hover { background: rgba(255,255,255,0.08); }
 
-    /* YouTube results */
-    .yt-item {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+    /* Song list sort header */
+    .sort-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; margin-bottom: 4px; font-size: 0.8rem; color: var(--text-muted);
     }
-    .yt-item img {
-      width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;
+    .sort-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+      padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; cursor: pointer;
     }
-    .yt-item-body { padding: 10px 12px; }
-    .yt-item-title {
-      font-size: 0.9rem; font-weight: 600;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
+    .sort-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* Artist accordion */
+    .artist-group { margin-bottom: 4px; }
+    .artist-group-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); cursor: pointer;
+      -webkit-user-select: none; user-select: none;
     }
-    .yt-item-channel { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
-    .yt-item-actions { padding: 8px 12px; display: flex; gap: 8px; }
-    .yt-item-actions button {
-      flex: 1; padding: 8px; border-radius: var(--radius);
-      border: none; font-size: 0.85rem; cursor: pointer; color: #fff;
+    .artist-group-header:active { background: rgba(233,69,96,0.08); }
+    .artist-chevron {
+      font-size: 0.65rem; color: var(--text-muted);
+      transition: transform 0.2s; width: 12px; text-align: center;
     }
-    .btn-add { background: var(--accent); }
-    .btn-preview { background: var(--border); }
+    .artist-group.open .artist-chevron { transform: rotate(90deg); }
+    .artist-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
+    .artist-count { font-size: 0.8rem; color: var(--text-muted); }
+    .artist-group-songs { display: none; padding: 4px 0 4px 24px; }
+    .artist-group.open .artist-group-songs { display: block; }
+    .artist-song-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+    }
+    .artist-song-item:last-child { border-bottom: none; }
+    .artist-song-title { flex: 1; font-size: 0.9rem; }
+
+    /* YouTube results (inline, dismissible) */
+    #yt-results-section {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 10px 12px; display: none;
+    }
+    #yt-results-section.show { display: block; }
+    .yt-results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .yt-results-header h3 { font-size: 0.9rem; }
+    .yt-close {
+      background: transparent; border: none; color: var(--text-muted);
+      font-size: 1.2rem; cursor: pointer; padding: 4px 8px;
+    }
 
     /* Filter */
     #filter-input {
@@ -198,21 +227,35 @@
   </header>
 
   <div class="tabs">
-    <button class="tab active" data-tab="songs">My Songs</button>
-    <button class="tab" data-tab="youtube">YouTube</button>
+    <button class="tab active" data-tab="all-songs">All Songs</button>
+    <button class="tab" data-tab="by-artist">By Artist</button>
+  </div>
+
+  <!-- YouTube results (inline, above song list) -->
+  <div id="yt-results-section">
+    <div class="yt-results-header">
+      <h3>YouTube Results</h3>
+      <button class="yt-close" id="yt-close-btn">✕</button>
+    </div>
+    <div id="yt-results"></div>
   </div>
 
   <main>
-    <!-- Songs panel -->
-    <div id="songs-panel" class="panel active">
-      <input type="text" id="filter-input" placeholder="Filter songs…" />
+    <!-- All Songs panel -->
+    <div id="all-songs-panel" class="panel active">
+      <input type="text" id="filter-input" placeholder="Search songs…" />
+      <div class="sort-header">
+        Sort: <button class="sort-btn active" data-sort="date">Date Added</button>
+        <button class="sort-btn" data-sort="title">Title A-Z</button>
+        <button class="sort-btn" data-sort="artist">Artist A-Z</button>
+      </div>
       <div id="songs-list"></div>
     </div>
 
-    <!-- YouTube panel -->
-    <div id="youtube-panel" class="panel">
-      <div id="yt-results"></div>
-      <p id="yt-empty" class="empty">Search YouTube above to find songs</p>
+    <!-- By Artist panel -->
+    <div id="by-artist-panel" class="panel">
+      <input type="text" id="artist-filter-input" placeholder="Search songs…" style="width:100%;background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius);font-size:1rem;outline:none;margin-bottom:10px;" />
+      <div id="artist-list"></div>
     </div>
   </main>
 
@@ -260,31 +303,64 @@ function decodeHTML(html) {
 }
 
 // ── Tabs ──────────────────────────────────────────────
+let activeTab = "all-songs";
+
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
     tab.classList.add("active");
-    document.getElementById(tab.dataset.tab + "-panel").classList.add("active");
+    activeTab = tab.dataset.tab;
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.getElementById(activeTab + "-panel").classList.add("active");
+    refreshView();
   });
 });
 
 // ── Songs ─────────────────────────────────────────────
 let allSongs = [];
+let currentSort = "date";
 
 async function loadSongs() {
   const res = await fetch(API + "/api/songs");
   allSongs = await res.json();
-  renderSongs(allSongs);
+  refreshView();
+}
+
+function refreshView() {
+  const filterVal = activeTab === "all-songs"
+    ? document.getElementById("filter-input").value.toLowerCase()
+    : document.getElementById("artist-filter-input").value.toLowerCase();
+  let songs = allSongs;
+  if (filterVal) {
+    songs = allSongs.filter(s =>
+      s.title.toLowerCase().includes(filterVal) || s.artist.toLowerCase().includes(filterVal)
+    );
+  }
+  if (activeTab === "all-songs") {
+    renderSongs(songs);
+  } else {
+    renderByArtist(songs);
+  }
+}
+
+function sortSongs(songs) {
+  if (currentSort === "date") return songs;
+  const sorted = [...songs].sort((a, b) => {
+    const aVal = (a[currentSort] || "").toLowerCase();
+    const bVal = (b[currentSort] || "").toLowerCase();
+    return aVal.localeCompare(bVal);
+  });
+  return sorted;
 }
 
 function renderSongs(songs) {
+  const sorted = sortSongs(songs);
   const list = document.getElementById("songs-list");
-  if (!songs.length) {
+  if (!sorted.length) {
     list.innerHTML = '<p class="empty">No songs yet</p>';
     return;
   }
-  list.innerHTML = songs.map((s, i) => `
+  list.innerHTML = sorted.map((s, i) => `
     <div class="song-item" data-song-id="${s.id}" data-title="${encodeURIComponent(s.title)}" data-artist="${encodeURIComponent(s.artist)}">
       <span class="song-num">${i + 1}</span>
       <div class="song-info">
@@ -297,18 +373,75 @@ function renderSongs(songs) {
   `).join("");
 }
 
+function renderByArtist(songs) {
+  const list = document.getElementById("artist-list");
+  if (!songs.length) {
+    list.innerHTML = '<p class="empty">No songs yet</p>';
+    return;
+  }
+  const groups = {};
+  songs.forEach(s => {
+    const key = (s.artist || "Unknown").trim().toLowerCase();
+    if (!groups[key]) groups[key] = { display: s.artist || "Unknown", songs: [] };
+    groups[key].songs.push(s);
+  });
+  const sortedKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+  list.innerHTML = sortedKeys.map(key => {
+    const g = groups[key];
+    g.songs.sort((a, b) => (a.title || "").toLowerCase().localeCompare((b.title || "").toLowerCase()));
+    return `
+      <div class="artist-group">
+        <div class="artist-group-header">
+          <span class="artist-chevron">▶</span>
+          <span class="artist-name">${decodeHTML(g.display)}</span>
+          <span class="artist-count">${g.songs.length} song${g.songs.length !== 1 ? "s" : ""}</span>
+        </div>
+        <div class="artist-group-songs">
+          ${g.songs.map(s => `
+            <div class="artist-song-item" data-song-id="${s.id}" data-title="${encodeURIComponent(s.title)}" data-artist="${encodeURIComponent(s.artist)}">
+              <span class="artist-song-title">${decodeHTML(s.title)}</span>
+              <button class="song-play" data-id="${s.youtube_id}"><svg width="24" height="18" viewBox="0 0 68 48"><rect rx="10" ry="10" width="68" height="48" fill="#f00"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg></button>
+              <button class="song-menu">⋮</button>
+            </div>
+          `).join("")}
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// ── Artist accordion toggle ───────────────────────────
+document.getElementById("artist-list").addEventListener("click", (e) => {
+  const header = e.target.closest(".artist-group-header");
+  if (header) {
+    header.parentElement.classList.toggle("open");
+  }
+});
+
+// ── Sort buttons ──────────────────────────────────────
+document.querySelectorAll(".sort-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".sort-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentSort = btn.dataset.sort;
+    refreshView();
+  });
+});
+
+// ── Filter inputs ─────────────────────────────────────
+document.getElementById("filter-input").addEventListener("input", () => refreshView());
+document.getElementById("artist-filter-input").addEventListener("input", () => refreshView());
+
 // ── Menu button opens action sheet ────────────────────
 let lpSongId = null;
 let lpSongTitle = "";
 let lpSongArtist = "";
 
-const songsList = document.getElementById("songs-list");
 const overlay = document.getElementById("action-overlay");
 
-songsList.addEventListener("click", (e) => {
+document.addEventListener("click", (e) => {
   const menuBtn = e.target.closest(".song-menu");
   if (!menuBtn) return;
-  const item = menuBtn.closest(".song-item");
+  const item = menuBtn.closest("[data-song-id]");
   if (!item) return;
   lpSongId = Number(item.dataset.songId);
   lpSongTitle = decodeURIComponent(item.dataset.title);
@@ -320,6 +453,21 @@ songsList.addEventListener("click", (e) => {
 // Close action sheet
 document.getElementById("action-cancel").addEventListener("click", () => overlay.classList.remove("show"));
 overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.classList.remove("show"); });
+
+// ── Play button (both panels) ─────────────────────────
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".song-play");
+  if (!btn) return;
+  e.stopPropagation();
+  fetch("/api/play", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ youtubeId: btn.dataset.id })
+  }).then(r => {
+    if (!r.ok) showToast("Failed to play");
+  }).catch(() => showToast("Failed to play"));
+  showToast("Playing on desktop...");
+});
 
 // ── Swap ──────────────────────────────────────────────
 document.getElementById("action-swap").addEventListener("click", async () => {
@@ -377,32 +525,14 @@ document.getElementById("edit-save-btn").addEventListener("click", async () => {
   } catch { showToast("Failed to save"); }
 });
 
-document.getElementById("songs-list").addEventListener("click", (e) => {
-  const btn = e.target.closest(".song-play");
-  if (!btn) return;
-  e.stopPropagation();
-  fetch("/api/play", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ youtubeId: btn.dataset.id })
-  }).then(r => {
-    if (!r.ok) showToast("Failed to play");
-  }).catch(() => showToast("Failed to play"));
-  showToast("Playing on desktop...");
-});
-
-// Filter
-document.getElementById("filter-input").addEventListener("input", (e) => {
-  const q = e.target.value.toLowerCase();
-  if (!q) { renderSongs(allSongs); return; }
-  renderSongs(allSongs.filter(s =>
-    s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q)
-  ));
-});
-
 // ── YouTube Search ────────────────────────────────────
 const ytSearchInput = document.getElementById("yt-search");
 const ytSearchBtn = document.getElementById("yt-search-btn");
+const ytResultsSection = document.getElementById("yt-results-section");
+
+document.getElementById("yt-close-btn").addEventListener("click", () => {
+  ytResultsSection.classList.remove("show");
+});
 
 async function doSearch() {
   const q = ytSearchInput.value.trim();
@@ -413,11 +543,7 @@ async function doSearch() {
     const res = await fetch(API + "/api/youtube/search?q=" + encodeURIComponent(q));
     const results = await res.json();
     renderYTResults(results);
-    // Switch to YouTube tab
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-    document.querySelector('[data-tab="youtube"]').classList.add("active");
-    document.getElementById("youtube-panel").classList.add("active");
+    ytResultsSection.classList.add("show");
   } catch (err) {
     showToast("Search failed: " + err.message);
   } finally {
@@ -431,24 +557,18 @@ ytSearchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doSear
 
 function renderYTResults(results) {
   const container = document.getElementById("yt-results");
-  const empty = document.getElementById("yt-empty");
   if (!results.length) {
-    container.innerHTML = "";
-    empty.style.display = "block";
+    container.innerHTML = '<p class="empty">No results found</p>';
     return;
   }
-  empty.style.display = "none";
   container.innerHTML = results.map(r => `
-    <div class="yt-item">
-      <img src="${r.thumbnail}" alt="" loading="lazy" />
-      <div class="yt-item-body">
-        <div class="yt-item-title">${decodeHTML(r.title)}</div>
-        <div class="yt-item-channel">${decodeHTML(r.channelTitle)}</div>
+    <div class="song-item">
+      <div class="song-info">
+        <div class="song-title">${decodeHTML(r.title)}</div>
+        <div class="song-artist">${decodeHTML(r.channelTitle)}</div>
       </div>
-      <div class="yt-item-actions">
-        <button class="btn-preview" data-id="${r.videoId}">Preview</button>
-        <button class="btn-add" data-id="${r.videoId}" data-title="${encodeURIComponent(r.title)}" data-channel="${encodeURIComponent(r.channelTitle)}">+ Add</button>
-      </div>
+      <button class="song-play" data-id="${r.videoId}" style="opacity:0.5"><svg width="24" height="18" viewBox="0 0 68 48"><rect rx="10" ry="10" width="68" height="48" fill="#f00"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg></button>
+      <button class="btn-yt-add" data-id="${r.videoId}" data-title="${encodeURIComponent(r.title)}" data-channel="${encodeURIComponent(r.channelTitle)}" style="background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:var(--radius);font-size:0.8rem;cursor:pointer;">+ Add</button>
     </div>
   `).join("");
 }
@@ -457,12 +577,7 @@ document.getElementById("yt-results").addEventListener("click", async (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
 
-  if (btn.classList.contains("btn-preview")) {
-    window.open("https://www.youtube.com/watch?v=" + btn.dataset.id, "_blank");
-    return;
-  }
-
-  if (btn.classList.contains("btn-add")) {
+  if (btn.classList.contains("btn-yt-add")) {
     const rawTitle = decodeURIComponent(btn.dataset.title);
     const parsed = parseVideoTitle(rawTitle);
     try {
