@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' https://i.ytimg.com; style-src 'self' 'unsafe-inline';" />
-  <title>Karaoke Database</title>
+        content="default-src 'self'; img-src 'self' https://i.ytimg.com data:; style-src 'self' 'unsafe-inline';" />
+  <title>Open Mic</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- ── Header ──────────────────────────────────────────── -->
   <header>
-    <h1>🎤 Karaoke Database</h1>
+    <h1>🎤 City Karaoke</h1>
     <div id="yt-search-bar">
       <input
         type="text"
@@ -21,7 +21,9 @@
       />
       <button id="yt-search-btn">Search</button>
     </div>
-    <span id="mobile-url" class="mobile-badge" title="Open this URL on your phone"></span>
+    <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
+      <img id="mobile-qr-img" alt="QR Code" />
+    </div>
   </header>
 
   <!-- ── YouTube Search Results ──────────────────────────── -->
@@ -36,7 +38,6 @@
   <!-- ── Saved Songs ─────────────────────────────────────── -->
   <section id="songs-section">
     <div class="section-header">
-      <h2>My Songs</h2>
       <input
         type="text"
         id="local-search-input"

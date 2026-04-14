@@ -51,14 +51,18 @@ header h1 {
 }
 
 .mobile-badge {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.06);
-  padding: 4px 10px;
-  border-radius: var(--radius);
-  white-space: nowrap;
-  cursor: pointer;
   margin-left: auto;
+  cursor: pointer;
+  background: #fff;
+  padding: 4px;
+  border-radius: var(--radius);
+  line-height: 0;
+}
+
+.mobile-badge img {
+  width: 64px;
+  height: 64px;
+  display: block;
 }
 
 #yt-search-input {

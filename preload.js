@@ -21,4 +21,5 @@ contextBridge.exposeInMainWorld("api", {
 
   // Mobile
   getMobileUrl: () => ipcRenderer.invoke("mobile:url"),
+  getMobileQr: () => ipcRenderer.invoke("mobile:qr"),
 });

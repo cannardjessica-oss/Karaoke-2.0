@@ -628,14 +628,18 @@ manualAddBtn.addEventListener("click", async () => {
 // ── Init ──────────────────────────────────────────────────────
 loadSongs();
 
-// Show mobile URL in header
+// Show mobile QR code in header
 (async () => {
-  const url = await window.api.getMobileUrl();
-  const badge = document.getElementById("mobile-url");
-  if (url && badge) {
-    badge.textContent = `📱 ${url}`;
-    badge.title = "Open this URL on your phone (same Wi-Fi). Click to copy.";
-    badge.addEventListener("click", () => {
+  const [url, qr] = await Promise.all([
+    window.api.getMobileUrl(),
+    window.api.getMobileQr(),
+  ]);
+  const img = document.getElementById("mobile-qr-img");
+  const container = document.getElementById("mobile-qr");
+  if (qr && img) {
+    img.src = qr;
+    container.title = `Scan to open on your phone (${url})`;
+    container.addEventListener("click", () => {
       navigator.clipboard.writeText(url);
       showToast("Mobile URL copied to clipboard!");
     });

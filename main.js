@@ -12,9 +12,11 @@ const XLSX = require("xlsx");
 const db = require("./database");
 const youtube = require("./youtube");
 const mobileServer = require("./server");
+const QRCode = require("qrcode");
 
 let mainWindow;
 let mobileUrl = "";
+let mobileQr = "";
 let playerWindows = [];
 
 function openPlayerWindow(youtubeId) {
@@ -99,6 +101,7 @@ function createWindow() {
 // ── IPC Handlers ──────────────────────────────────────────────
 
 ipcMain.handle("mobile:url", () => mobileUrl);
+ipcMain.handle("mobile:qr", () => mobileQr);
 
 ipcMain.handle("db:getAllSongs", () => {
   return db.getAllSongs();
@@ -270,6 +273,7 @@ app.whenReady().then(async () => {
     },
   });
   mobileUrl = `http://${ip}:${port}`;
+  mobileQr = await QRCode.toDataURL(mobileUrl, { width: 128, margin: 1 });
   console.log(`Mobile access: ${mobileUrl}`);
 
   globalShortcut.register("F11", () => {
