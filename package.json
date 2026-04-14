@@ -1,0 +1,22 @@
+{
+  "name": "karaoke-database",
+  "version": "1.0.0",
+  "description": "Karaoke song database with YouTube search integration",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild"
+  },
+  "keywords": [
+    "karaoke",
+    "youtube",
+    "electron"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^41.2.0",
+    "express": "^4.22.1",
+    "sql.js": "^1.14.1",
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' https://i.ytimg.com; style-src 'self' 'unsafe-inline';" />
+  <title>Karaoke Database</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ── Header ──────────────────────────────────────────── -->
+  <header>
+    <h1>🎤 Karaoke Database</h1>
+    <div id="yt-search-bar">
+      <input
+        type="text"
+        id="yt-search-input"
+        placeholder="Search YouTube for karaoke songs…"
+        autocomplete="off"
+      />
+      <button id="yt-search-btn">Search</button>
+      <button id="import-btn" class="btn-secondary">📥 Import</button>
+    </div>
+    <span id="mobile-url" class="mobile-badge" title="Open this URL on your phone"></span>
+  </header>
+
+  <!-- ── YouTube Search Results ──────────────────────────── -->
+  <section id="yt-results-section" class="hidden">
+    <div class="section-header">
+      <h2>YouTube Results</h2>
+      <button id="yt-results-close" class="btn-icon" title="Close">✕</button>
+    </div>
+    <div id="yt-results"></div>
+  </section>
+
+  <!-- ── Saved Songs ─────────────────────────────────────── -->
+  <section id="songs-section">
+    <div class="section-header">
+      <h2>My Songs</h2>
+      <input
+        type="text"
+        id="local-search-input"
+        placeholder="Filter saved songs…"
+      />
+    </div>
+
+    <table id="songs-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Artist</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="songs-tbody"></tbody>
+    </table>
+
+    <p id="no-songs-msg" class="muted">No songs yet — search YouTube above to add some!</p>
+  </section>
+
+  <!-- ── Add Song Modal (manual entry) ───────────────────── -->
+  <div id="add-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Add Song Manually</h3>
+      <label>Title <input type="text" id="manual-title" /></label>
+      <label>Artist <input type="text" id="manual-artist" /></label>
+      <label>YouTube ID <input type="text" id="manual-ytid" placeholder="e.g. dQw4w9WgXcQ" /></label>
+      <div class="modal-actions">
+        <button id="manual-add-btn">Add</button>
+        <button id="manual-cancel-btn" class="btn-secondary">Cancel</button>
+      </div>
+      <p id="manual-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- ── Context Menu ─────────────────────────────────────── -->
+  <div id="context-menu" class="context-menu hidden">
+    <button id="ctx-swap">⇄ Swap Title & Artist</button>
+    <button id="ctx-delete">🗑️ Delete Song</button>
+  </div>
+
+  <!-- ── Toast ───────────────────────────────────────────── -->
+  <div id="toast" class="hidden"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
