@@ -15,10 +15,50 @@ const mobileServer = require("./server");
 
 let mainWindow;
 let mobileUrl = "";
+let playerWindows = [];
 
 function openPlayerWindow(youtubeId) {
-  const url = `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`;
-  shell.openExternal(url);
+  // Close any existing player windows
+  playerWindows.forEach((w) => {
+    if (!w.isDestroyed()) w.close();
+  });
+  playerWindows = [];
+
+  const playerWin = new BrowserWindow({
+    fullscreen: true,
+    autoHideMenuBar: true,
+    backgroundColor: "#000",
+    webPreferences: { contextIsolation: true, nodeIntegration: false },
+  });
+  playerWindows.push(playerWin);
+  playerWin.on("closed", () => {
+    playerWindows = playerWindows.filter((w) => w !== playerWin);
+  });
+  playerWin.loadURL(
+    `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`,
+  );
+  playerWin.webContents.on("did-finish-load", () => {
+    playerWin.webContents.executeJavaScript(`
+      const iv = setInterval(() => {
+        const btn = document.querySelector('.ytp-fullscreen-button');
+        if (btn) { btn.click(); clearInterval(iv); }
+      }, 500);
+      setTimeout(() => clearInterval(iv), 10000);
+
+      // Watch for video ending and close the window
+      const endIv = setInterval(() => {
+        const vid = document.querySelector('video');
+        if (vid) {
+          vid.addEventListener('ended', () => window.close());
+          clearInterval(endIv);
+        }
+      }, 500);
+      setTimeout(() => clearInterval(endIv), 10000);
+    `);
+  });
+  playerWin.webContents.on("before-input-event", (_e, input) => {
+    if (input.key === "Escape") playerWin.close();
+  });
 }
 
 function createWindow() {

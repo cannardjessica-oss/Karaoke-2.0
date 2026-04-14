@@ -75,6 +75,13 @@ function start(port = 3000, options = {}) {
     res.json({ success: true });
   });
 
+  app.get("/player/:id", (req, res) => {
+    const vid = req.params.id;
+    res.send(
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{margin:0;padding:0;overflow:hidden;background:#000}iframe{width:100vw;height:100vh;border:0}</style></head><body><iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&fs=1" allow="autoplay;fullscreen;encrypted-media" allowfullscreen></iframe></body></html>`,
+    );
+  });
+
   app.get("/api/youtube/search", async (req, res) => {
     const q = req.query.q || "";
     if (!q) return res.status(400).json({ error: "query is required" });
