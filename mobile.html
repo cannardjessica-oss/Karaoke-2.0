@@ -81,7 +81,7 @@
       padding: 4px 8px; cursor: pointer; white-space: nowrap;
       line-height: 0; border-radius: var(--radius);
     }
-    .song-play svg { display: block; }
+    .song-play svg { display: block; pointer-events: none; }
     .song-play:hover { opacity: 0.8; }
     .song-menu {
       background: transparent; border: none; color: var(--text-muted);
@@ -380,11 +380,14 @@ document.getElementById("edit-save-btn").addEventListener("click", async () => {
 document.getElementById("songs-list").addEventListener("click", (e) => {
   const btn = e.target.closest(".song-play");
   if (!btn) return;
+  e.stopPropagation();
   fetch("/api/play", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ youtubeId: btn.dataset.id })
-  });
+  }).then(r => {
+    if (!r.ok) showToast("Failed to play");
+  }).catch(() => showToast("Failed to play"));
   showToast("Playing on desktop...");
 });
 

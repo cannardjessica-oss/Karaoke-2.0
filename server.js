@@ -69,7 +69,8 @@ function start(port = 3000, options = {}) {
 
   app.post("/api/play", (req, res) => {
     const { youtubeId } = req.body;
-    if (!youtubeId) return res.status(400).json({ error: "youtubeId is required" });
+    if (!youtubeId)
+      return res.status(400).json({ error: "youtubeId is required" });
     if (onPlay) onPlay(youtubeId);
     res.json({ success: true });
   });

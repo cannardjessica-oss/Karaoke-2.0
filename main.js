@@ -16,6 +16,11 @@ const mobileServer = require("./server");
 let mainWindow;
 let mobileUrl = "";
 
+function openPlayerWindow(youtubeId) {
+  const url = `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`;
+  shell.openExternal(url);
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -78,8 +83,7 @@ ipcMain.handle("youtube:search", async (_event, query) => {
 });
 
 ipcMain.handle("play:open", (_event, youtubeId) => {
-  const url = `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`;
-  shell.openExternal(url);
+  openPlayerWindow(youtubeId);
 });
 
 ipcMain.handle("import:csv", async () => {
@@ -218,9 +222,8 @@ app.whenReady().then(async () => {
   // Start mobile web server
   const { ip, port } = mobileServer.start(3000, {
     onPlay: (youtubeId) => {
-      const url = `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`;
-      shell.openExternal(url);
-    }
+      openPlayerWindow(youtubeId);
+    },
   });
   mobileUrl = `http://${ip}:${port}`;
   console.log(`Mobile access: ${mobileUrl}`);
