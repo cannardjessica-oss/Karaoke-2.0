@@ -18,7 +18,10 @@ function getLocalIP() {
   return "127.0.0.1";
 }
 
-function start(port = 3000) {
+let onPlay = null;
+
+function start(port = 3000, options = {}) {
+  onPlay = options.onPlay || null;
   const app = express();
   app.use(express.json());
 
@@ -61,6 +64,13 @@ function start(port = 3000) {
       return res.status(400).json({ error: "title and artist are required" });
     }
     db.updateSong(id, title, artist);
+    res.json({ success: true });
+  });
+
+  app.post("/api/play", (req, res) => {
+    const { youtubeId } = req.body;
+    if (!youtubeId) return res.status(400).json({ error: "youtubeId is required" });
+    if (onPlay) onPlay(youtubeId);
     res.json({ success: true });
   });
 

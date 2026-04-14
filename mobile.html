@@ -380,7 +380,12 @@ document.getElementById("edit-save-btn").addEventListener("click", async () => {
 document.getElementById("songs-list").addEventListener("click", (e) => {
   const btn = e.target.closest(".song-play");
   if (!btn) return;
-  window.open("https://www.youtube.com/watch?v=" + btn.dataset.id, "_blank");
+  fetch("/api/play", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ youtubeId: btn.dataset.id })
+  });
+  showToast("Playing on desktop...");
 });
 
 // Filter

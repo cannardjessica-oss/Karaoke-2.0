@@ -216,7 +216,12 @@ app.whenReady().then(async () => {
   createWindow();
 
   // Start mobile web server
-  const { ip, port } = mobileServer.start(3000);
+  const { ip, port } = mobileServer.start(3000, {
+    onPlay: (youtubeId) => {
+      const url = `https://www.youtube.com/watch?v=${encodeURIComponent(youtubeId)}`;
+      shell.openExternal(url);
+    }
+  });
   mobileUrl = `http://${ip}:${port}`;
   console.log(`Mobile access: ${mobileUrl}`);
 
