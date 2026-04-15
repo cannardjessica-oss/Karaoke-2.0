@@ -98,6 +98,42 @@ function start(port = 3000, options = {}) {
     }
   });
 
+  // ── Tag / Favorites API ─────────────────────────────
+  app.get("/api/tags", (_req, res) => {
+    res.json(db.getAllTaggedSongs());
+  });
+
+  app.post("/api/tags", (req, res) => {
+    const { songId, singerName } = req.body;
+    if (!songId || !singerName) {
+      return res
+        .status(400)
+        .json({ error: "songId and singerName are required" });
+    }
+    res.json(db.addTag(songId, singerName));
+  });
+
+  app.delete("/api/tags", (req, res) => {
+    const { songId, singerName } = req.body;
+    if (!songId || !singerName) {
+      return res
+        .status(400)
+        .json({ error: "songId and singerName are required" });
+    }
+    db.removeTag(songId, singerName);
+    res.json({ success: true });
+  });
+
+  app.put("/api/tags", (req, res) => {
+    const { songId, oldName, newName } = req.body;
+    if (!songId || !oldName || !newName) {
+      return res
+        .status(400)
+        .json({ error: "songId, oldName, and newName are required" });
+    }
+    res.json(db.updateTag(songId, oldName, newName));
+  });
+
   const ip = getLocalIP();
   server = app.listen(port, "0.0.0.0", () => {
     console.log(`Mobile server running at http://${ip}:${port}`);

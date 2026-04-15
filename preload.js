@@ -10,6 +10,19 @@ contextBridge.exposeInMainWorld("api", {
   deleteSong: (id) => ipcRenderer.invoke("db:deleteSong", id),
   searchLocal: (query) => ipcRenderer.invoke("db:searchLocal", query),
 
+  // Tags / Favorites
+  addTag: (songId, singerName) =>
+    ipcRenderer.invoke("db:addTag", { songId, singerName }),
+  removeTag: (songId, singerName) =>
+    ipcRenderer.invoke("db:removeTag", { songId, singerName }),
+  updateTag: (songId, oldName, newName) =>
+    ipcRenderer.invoke("db:updateTag", { songId, oldName, newName }),
+  getSongsBySinger: (singerName) =>
+    ipcRenderer.invoke("db:getSongsBySinger", singerName),
+  getAllSingers: () => ipcRenderer.invoke("db:getAllSingers"),
+  getTagsForSong: (songId) => ipcRenderer.invoke("db:getTagsForSong", songId),
+  getAllTaggedSongs: () => ipcRenderer.invoke("db:getAllTaggedSongs"),
+
   // YouTube
   searchYouTube: (query) => ipcRenderer.invoke("youtube:search", query),
 

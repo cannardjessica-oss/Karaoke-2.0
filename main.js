@@ -125,6 +125,35 @@ ipcMain.handle("db:searchLocal", (_event, query) => {
   return db.searchSongs(query);
 });
 
+ipcMain.handle("db:addTag", (_event, { songId, singerName }) => {
+  return db.addTag(songId, singerName);
+});
+
+ipcMain.handle("db:removeTag", (_event, { songId, singerName }) => {
+  db.removeTag(songId, singerName);
+  return { success: true };
+});
+
+ipcMain.handle("db:updateTag", (_event, { songId, oldName, newName }) => {
+  return db.updateTag(songId, oldName, newName);
+});
+
+ipcMain.handle("db:getSongsBySinger", (_event, singerName) => {
+  return db.getSongsBySinger(singerName);
+});
+
+ipcMain.handle("db:getAllSingers", () => {
+  return db.getAllSingers();
+});
+
+ipcMain.handle("db:getTagsForSong", (_event, songId) => {
+  return db.getTagsForSong(songId);
+});
+
+ipcMain.handle("db:getAllTaggedSongs", () => {
+  return db.getAllTaggedSongs();
+});
+
 ipcMain.handle("youtube:search", async (_event, query) => {
   return youtube.searchYouTube(query);
 });

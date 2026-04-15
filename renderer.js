@@ -15,6 +15,10 @@ const allSongsPanel = document.getElementById("all-songs-panel");
 const artistPanel = document.getElementById("artist-panel");
 const artistList = document.getElementById("artist-list");
 const noArtistsMsg = document.getElementById("no-artists-msg");
+const favoritesPanel = document.getElementById("favorites-panel");
+const favoritesTbody = document.getElementById("favorites-tbody");
+const noFavoritesMsg = document.getElementById("no-favorites-msg");
+const favoritesFilter = document.getElementById("favorites-filter");
 
 // Sort state
 let currentSort = null; // null = date (default), "title", "artist"
@@ -341,16 +345,29 @@ tabs.forEach((tab) => {
     tab.classList.add("active");
     activeTab = tab.dataset.tab;
 
+    // Toggle search bar visibility (Favorites has its own filter)
+    document.getElementById("local-search-bar").style.display =
+      activeTab === "favorites" ? "none" : "flex";
+
+    // Hide all panels
+    allSongsPanel.classList.add("hidden");
+    allSongsPanel.classList.remove("active");
+    artistPanel.classList.add("hidden");
+    artistPanel.classList.remove("active");
+    favoritesPanel.classList.add("hidden");
+    favoritesPanel.classList.remove("active");
+
     if (activeTab === "all-songs") {
       allSongsPanel.classList.add("active");
-      artistPanel.classList.add("hidden");
-      artistPanel.classList.remove("active");
       allSongsPanel.classList.remove("hidden");
-    } else {
+    } else if (activeTab === "by-artist") {
       artistPanel.classList.add("active");
-      allSongsPanel.classList.add("hidden");
-      allSongsPanel.classList.remove("active");
       artistPanel.classList.remove("hidden");
+    } else if (activeTab === "favorites") {
+      favoritesPanel.classList.add("active");
+      favoritesPanel.classList.remove("hidden");
+      await loadFavorites();
+      return;
     }
 
     // Re-render from cache or fetch
@@ -511,6 +528,14 @@ document.addEventListener("click", (e) => {
   ctxMenu.classList.add("hidden");
 });
 
+document.getElementById("ctx-tag").addEventListener("click", () => {
+  if (ctxTargetSongId == null) return;
+  ctxMenu.classList.add("hidden");
+  showTagModal(ctxTargetSongId);
+  ctxTargetSongId = null;
+  ctxTargetRow = null;
+});
+
 document.getElementById("ctx-swap").addEventListener("click", async () => {
   if (ctxTargetSongId == null || !ctxTargetRow) return;
   const titleCell = ctxTargetRow.querySelector('[data-field="title"]');
@@ -622,6 +647,156 @@ manualAddBtn.addEventListener("click", async () => {
   } else {
     manualError.textContent = result.error;
     manualError.classList.remove("hidden");
+  }
+});
+
+// ── Tag modal ─────────────────────────────────────────────────
+const tagModal = document.getElementById("tag-modal");
+const tagModalInput = document.getElementById("tag-modal-input");
+const tagModalSave = document.getElementById("tag-modal-save");
+const tagModalCancel = document.getElementById("tag-modal-cancel");
+let pendingTagSongId = null;
+
+function showTagModal(songId) {
+  pendingTagSongId = songId;
+  tagModalInput.value = "";
+  tagModal.classList.remove("hidden");
+  tagModalInput.focus();
+}
+
+tagModalCancel.addEventListener("click", () => {
+  tagModal.classList.add("hidden");
+  pendingTagSongId = null;
+});
+
+tagModalSave.addEventListener("click", async () => {
+  const name = tagModalInput.value.trim();
+  if (!name) return;
+  tagModal.classList.add("hidden");
+  if (pendingTagSongId != null) {
+    const result = await window.api.addTag(pendingTagSongId, name);
+    if (result.success) {
+      showToast("Added to favorites!");
+    } else {
+      showToast(result.error, false);
+    }
+    pendingTagSongId = null;
+  }
+});
+
+tagModalInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") tagModalSave.click();
+  if (e.key === "Escape") tagModalCancel.click();
+});
+
+// ── Favorites: load & render ──────────────────────────────────
+let allTaggedCache = [];
+
+async function loadFavorites() {
+  allTaggedCache = await window.api.getAllTaggedSongs();
+  populateFavoritesFilter();
+  renderFavorites();
+}
+
+function populateFavoritesFilter() {
+  const selected = favoritesFilter.value;
+  const names = [...new Set(allTaggedCache.map((r) => r.singer_name))].sort(
+    (a, b) => a.toLowerCase().localeCompare(b.toLowerCase()),
+  );
+  favoritesFilter.innerHTML = '<option value="">All</option>';
+  names.forEach((name) => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    favoritesFilter.appendChild(opt);
+  });
+  favoritesFilter.value = selected;
+}
+
+function renderFavorites() {
+  const selected = favoritesFilter.value;
+  const filtered = selected
+    ? allTaggedCache.filter((r) => r.singer_name === selected)
+    : allTaggedCache;
+
+  favoritesTbody.innerHTML = "";
+  noFavoritesMsg.classList.toggle("hidden", filtered.length > 0);
+
+  filtered.forEach((row, idx) => {
+    const tr = document.createElement("tr");
+    tr.dataset.songId = row.id;
+    tr.dataset.singerName = row.singer_name;
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td>${decodeHTML(row.title)}</td>
+      <td>${decodeHTML(row.artist)}</td>
+      <td class="editable-tag" contenteditable="true" data-song-id="${row.id}" data-original="${row.singer_name}">${decodeHTML(row.singer_name)}</td>
+      <td>
+        <button class="btn-small btn-play" data-action="play" data-id="${row.youtube_id}" title="Play on YouTube"><svg width="24" height="18" viewBox="0 0 68 48"><rect rx="10" ry="10" width="68" height="48" fill="#f00"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg></button>
+        <button class="btn-small btn-remove" data-action="remove-tag" data-song-id="${row.id}" data-singer="${row.singer_name}" title="Remove tag">✕</button>
+      </td>
+    `;
+    favoritesTbody.appendChild(tr);
+  });
+}
+
+// ── Favorites: dropdown filter ──────────────────────────────
+favoritesFilter.addEventListener("change", () => {
+  renderFavorites();
+});
+
+// ── Favorites: handle clicks in favorites table ───────────────
+favoritesTbody.addEventListener("click", async (e) => {
+  const playBtn = e.target.closest('[data-action="play"]');
+  if (playBtn) {
+    await window.api.playSong(playBtn.dataset.id);
+    return;
+  }
+
+  const removeBtn = e.target.closest('[data-action="remove-tag"]');
+  if (!removeBtn) return;
+
+  const songId = Number(removeBtn.dataset.songId);
+  const singer = removeBtn.dataset.singer;
+  await window.api.removeTag(songId, singer);
+  showToast("Tag removed.");
+  await loadFavorites();
+});
+
+// ── Favorites: edit tag name on blur/Enter ────────────────────
+favoritesTbody.addEventListener(
+  "blur",
+  async (e) => {
+    const cell = e.target;
+    if (!cell.classList.contains("editable-tag")) return;
+
+    const songId = Number(cell.dataset.songId);
+    const oldName = cell.dataset.original;
+    const newName = cell.textContent.trim();
+
+    if (!newName) {
+      cell.textContent = oldName;
+      showToast("Name cannot be empty.", false);
+      return;
+    }
+    if (newName === oldName) return;
+
+    const result = await window.api.updateTag(songId, oldName, newName);
+    if (result.success) {
+      showToast("Tag updated!");
+      await loadFavorites();
+    } else {
+      cell.textContent = oldName;
+      showToast(result.error, false);
+    }
+  },
+  true,
+);
+
+favoritesTbody.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.classList.contains("editable-tag")) {
+    e.preventDefault();
+    e.target.blur();
   }
 });
 

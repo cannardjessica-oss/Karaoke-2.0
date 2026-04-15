@@ -25,6 +25,9 @@
       />
       <button id="yt-search-btn">Search</button>
     </div>
+    <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
+      <img id="mobile-qr-img" alt="QR Code" />
+    </div>
   </header>
 
   <!-- ── YouTube Search Results ──────────────────────────── -->
@@ -38,21 +41,19 @@
 
   <!-- ── Saved Songs ─────────────────────────────────────── -->
   <section id="songs-section">
-    <div class="section-header">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="all-songs">All Songs</button>
+      <button class="tab" data-tab="by-artist">By Artist</button>
+      <button class="tab" data-tab="favorites">Favorites</button>
+    </div>
+
+    <div id="local-search-bar">
       <input
         type="text"
         id="local-search-input"
         placeholder="Search songs…"
       />
-      <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
-        <img id="mobile-qr-img" alt="QR Code" />
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" data-tab="all-songs">All Songs</button>
-      <button class="tab" data-tab="by-artist">By Artist</button>
     </div>
 
     <!-- All Songs Panel -->
@@ -76,7 +77,40 @@
       <div id="artist-list"></div>
       <p id="no-artists-msg" class="muted hidden">No songs yet — search YouTube above to add some!</p>
     </div>
+
+    <!-- Favorites Panel -->
+    <div id="favorites-panel" class="tab-panel hidden">
+      <div class="favorites-header">
+        <select id="favorites-filter">
+          <option value="">All</option>
+        </select>
+      </div>
+      <table id="favorites-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Artist</th>
+            <th>Tagged By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="favorites-tbody"></tbody>
+      </table>
+      <p id="no-favorites-msg" class="muted">No favorites yet. Use the ⋮ menu to tag songs!</p>
+    </div>
   </section>
+
+  <!-- ── Tag Modal ─────────────────────────────────────────── -->
+  <div id="tag-modal" class="modal hidden">
+    <div class="modal-content">
+      <input type="text" id="tag-modal-input" autocomplete="off" />
+      <div class="modal-actions">
+        <button id="tag-modal-save">Save</button>
+        <button id="tag-modal-cancel" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ── Add Song Modal (manual entry) ───────────────────── -->
   <div id="add-modal" class="modal hidden">
@@ -95,6 +129,7 @@
 
   <!-- ── Context Menu ─────────────────────────────────────── -->
   <div id="context-menu" class="context-menu hidden">
+    <button id="ctx-tag">⭐ Add Tag</button>
     <button id="ctx-swap">⇄ Swap Title & Artist</button>
     <button id="ctx-delete">🗑️ Delete Song</button>
   </div>

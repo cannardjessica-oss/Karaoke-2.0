@@ -247,6 +247,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="all-songs">All Songs</button>
     <button class="tab" data-tab="by-artist">By Artist</button>
+    <button class="tab" data-tab="favorites">Favorites</button>
   </div>
 
   <!-- YouTube results (inline, above song list) -->
@@ -275,6 +276,14 @@
       <input type="text" id="artist-filter-input" placeholder="Search songs…" style="width:100%;background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius);font-size:1rem;outline:none;margin-bottom:10px;" />
       <div id="artist-list"></div>
     </div>
+
+    <!-- Favorites panel -->
+    <div id="favorites-panel" class="panel">
+      <select id="fav-filter" style="width:100%;background:var(--bg-input);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:var(--radius);font-size:1rem;outline:none;margin-bottom:10px;">
+        <option value="">All</option>
+      </select>
+      <div id="fav-list"></div>
+    </div>
   </main>
 
   <div id="m-toast"></div>
@@ -283,6 +292,7 @@
   <div id="action-overlay" class="overlay">
     <div class="action-sheet">
       <div id="action-title" class="action-sheet-title"></div>
+      <button id="action-tag">⭐ Add Tag</button>
       <button id="action-edit">✏️ Edit</button>
       <button id="action-swap">⇄ Swap Title & Artist</button>
       <button id="action-delete" class="danger">🗑️ Delete</button>
@@ -299,6 +309,17 @@
       <div class="edit-modal-actions">
         <button class="edit-cancel" id="edit-cancel-btn">Cancel</button>
         <button class="edit-save" id="edit-save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Modal -->
+  <div id="tag-modal" class="edit-modal">
+    <div class="edit-modal-content">
+      <input type="text" id="tag-input" autocomplete="off" style="text-align:center;" />
+      <div class="edit-modal-actions">
+        <button class="edit-cancel" id="tag-cancel-btn">Cancel</button>
+        <button class="edit-save" id="tag-save-btn">Save</button>
       </div>
     </div>
   </div>
@@ -330,7 +351,7 @@ document.querySelectorAll(".tab").forEach(tab => {
     activeTab = tab.dataset.tab;
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
     document.getElementById(activeTab + "-panel").classList.add("active");
-    refreshView();
+    if (activeTab === "favorites") { loadFavorites(); } else { refreshView(); }
   });
 });
 
@@ -541,6 +562,116 @@ document.getElementById("edit-save-btn").addEventListener("click", async () => {
     editModal.classList.remove("show");
     loadSongs();
   } catch { showToast("Failed to save"); }
+});
+
+// ── Tag (Add Tag from action sheet) ───────────────────
+const tagModal = document.getElementById("tag-modal");
+const tagInput = document.getElementById("tag-input");
+
+document.getElementById("action-tag").addEventListener("click", () => {
+  overlay.classList.remove("show");
+  tagInput.value = "";
+  tagModal.classList.add("show");
+  tagInput.focus();
+});
+
+document.getElementById("tag-cancel-btn").addEventListener("click", () => tagModal.classList.remove("show"));
+
+document.getElementById("tag-save-btn").addEventListener("click", async () => {
+  const name = tagInput.value.trim();
+  if (!name) return;
+  try {
+    const res = await fetch(API + "/api/tags", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ songId: lpSongId, singerName: name })
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast("Added to favorites!");
+    } else {
+      showToast(result.error || "Failed to tag");
+    }
+    tagModal.classList.remove("show");
+  } catch { showToast("Failed to tag"); }
+});
+
+tagInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("tag-save-btn").click();
+  if (e.key === "Escape") document.getElementById("tag-cancel-btn").click();
+});
+
+// ── Favorites ─────────────────────────────────────────
+let allTaggedCache = [];
+const favFilter = document.getElementById("fav-filter");
+const favList = document.getElementById("fav-list");
+
+async function loadFavorites() {
+  try {
+    const res = await fetch(API + "/api/tags");
+    allTaggedCache = await res.json();
+  } catch { allTaggedCache = []; }
+  populateFavFilter();
+  renderFavorites();
+}
+
+function populateFavFilter() {
+  const selected = favFilter.value;
+  const names = [...new Set(allTaggedCache.map(r => r.singer_name))].sort(
+    (a, b) => a.toLowerCase().localeCompare(b.toLowerCase())
+  );
+  favFilter.innerHTML = '<option value="">All</option>';
+  names.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    favFilter.appendChild(opt);
+  });
+  favFilter.value = selected;
+}
+
+function renderFavorites() {
+  const selected = favFilter.value;
+  const filtered = selected
+    ? allTaggedCache.filter(r => r.singer_name === selected)
+    : allTaggedCache;
+
+  if (!filtered.length) {
+    favList.innerHTML = '<p class="empty">No favorites yet. Use the ⋮ menu to tag songs!</p>';
+    return;
+  }
+
+  favList.innerHTML = filtered.map((r, i) => `
+    <div class="song-item" data-song-id="${r.id}" data-singer="${encodeURIComponent(r.singer_name)}">
+      <span class="song-num">${i + 1}</span>
+      <div class="song-info">
+        <div class="song-title">${decodeHTML(r.title)}</div>
+        <div class="song-artist">${decodeHTML(r.artist)}</div>
+        <div class="song-artist" style="color:var(--accent);font-size:0.75rem;">${decodeHTML(r.singer_name)}</div>
+      </div>
+      <button class="song-play" data-id="${r.youtube_id}"><svg width="24" height="18" viewBox="0 0 68 48"><rect rx="10" ry="10" width="68" height="48" fill="#f00"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg></button>
+      <button class="fav-remove" data-song-id="${r.id}" data-singer="${encodeURIComponent(r.singer_name)}" style="background:transparent;border:none;color:var(--text-muted);font-size:1.1rem;padding:4px 8px;cursor:pointer;">✕</button>
+    </div>
+  `).join("");
+}
+
+favFilter.addEventListener("change", () => renderFavorites());
+
+// Remove tag from favorites
+document.getElementById("fav-list").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".fav-remove");
+  if (!btn) return;
+  const songId = Number(btn.dataset.songId);
+  const singer = decodeURIComponent(btn.dataset.singer);
+  try {
+    await fetch(API + "/api/tags", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ songId, singerName: singer })
+    });
+    showToast("Tag removed");
+    loadFavorites();
+  } catch { showToast("Failed to remove"); }
 });
 
 // ── YouTube Search ────────────────────────────────────
