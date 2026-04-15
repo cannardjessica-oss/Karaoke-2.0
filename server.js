@@ -30,6 +30,10 @@ function start(port = 3000, options = {}) {
     res.sendFile(path.join(__dirname, "banner.png"));
   });
 
+  app.get("/mobile-banner.png", (_req, res) => {
+    res.sendFile(path.join(__dirname, "mobile-banner.png"));
+  });
+
   // Serve the mobile page
   app.get("/", (_req, res) => {
     res.sendFile(path.join(__dirname, "mobile.html"));
