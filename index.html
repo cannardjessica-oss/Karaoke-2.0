@@ -12,6 +12,9 @@
   <!-- ── Banner ──────────────────────────────────────────── -->
   <div class="banner">
     <img src="desktop-banner.png" alt="City Karaoke" />
+    <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
+      <img id="mobile-qr-img" alt="QR Code" />
+    </div>
   </div>
 
   <!-- ── Header ──────────────────────────────────────────── -->
@@ -24,9 +27,6 @@
         autocomplete="off"
       />
       <button id="yt-search-btn">Search</button>
-    </div>
-    <div id="mobile-qr" class="mobile-badge" title="Scan to open on your phone">
-      <img id="mobile-qr-img" alt="QR Code" />
     </div>
   </header>
 
@@ -132,6 +132,15 @@
     <button id="ctx-tag">⭐ Add Tag</button>
     <button id="ctx-swap">⇄ Swap Title & Artist</button>
     <button id="ctx-delete">🗑️ Delete Song</button>
+  </div>
+
+  <!-- ── QR Modal ────────────────────────────────────────── -->
+  <div id="qr-modal" class="qr-modal hidden">
+    <div class="qr-modal-backdrop"></div>
+    <div class="qr-modal-content">
+      <img id="qr-modal-img" alt="QR Code" />
+      <p id="qr-modal-url"></p>
+    </div>
   </div>
 
   <!-- ── Toast ───────────────────────────────────────────── -->

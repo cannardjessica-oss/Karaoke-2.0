@@ -815,8 +815,15 @@ loadSongs();
     img.src = qr;
     container.title = `Scan to open on your phone (${url})`;
     container.addEventListener("click", () => {
-      navigator.clipboard.writeText(url);
-      showToast("Mobile URL copied to clipboard!");
+      const modal = document.getElementById("qr-modal");
+      document.getElementById("qr-modal-img").src = qr;
+      document.getElementById("qr-modal-url").textContent = url;
+      modal.classList.remove("hidden");
     });
+    document
+      .querySelector(".qr-modal-backdrop")
+      .addEventListener("click", () => {
+        document.getElementById("qr-modal").classList.add("hidden");
+      });
   }
 })();
